@@ -1,0 +1,18 @@
+{
+    "name": "IPEnrichment",
+    "author": "65 CYS",
+    "version": "1.0",
+    "description": "Enriches IP address observables with information from a text file.",
+    "dataTypeList": ["ip"],
+    "baseConfig": "IPEnrichment",
+    "command": "IPEnrichment/ip_enrichment.py",
+    "configurationItems": [
+        {
+            "name": "text_file_path",
+            "description": "Path to the text file containing IP address information",
+            "type": "string",
+            "multi": false,
+            "required": true
+        }
+    ]
+}
