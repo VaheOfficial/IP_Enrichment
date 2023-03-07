@@ -1,47 +1,48 @@
-import os
-import re
-import json
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 
 from cortexutils.analyzer import Analyzer
+from description import RECORDS
 
 
 class IPEnrichment(Analyzer):
+
     def __init__(self):
         Analyzer.__init__(self)
+        self.answer = None
 
-    def process(self):
-        # Get the IP address observable from the TheHive case
-        ip_address = self.get_data().get('ip')
+    def process(self, query):
 
-        # Check if the IP address is valid
-        if not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', ip_address):
-            self.error('Invalid IP address')
-            return
+        record = RECORDS.get(query['name'])
+        if record is not None:
+            self.answer = record
+        else:
+            self.answer = f"No record found for {query['name']}"  
+    
+    def run(self):
+        if self.data_type not in ["ip"]:
+            self.error("Wrong data type")
 
-        # Check if the text file exists on the local machine
-        file_path = '/path/to/text/file.txt'
-        if not os.path.isfile(file_path):
-            self.error('File not found')
-            return
+        target = self.getData()
 
-        # Open the text file and search for the IP address
-        with open(file_path, 'r') as file:
-            for line in file:
-                if ip_address in line:
-                    # Extract the information from the same line as the IP address
-                    info = line.strip().split('\t')[1]
+        query = {
+            "name" : target,
+            "type" : "ANY"
+        }
+        target = ".".join(target.split('.')[::-1]) if self.data_type == "ip" else None
 
-                    # Update the observable description in the TheHive case
-                    observable_id = self.get_data().get('_id')
-                    observable_data = {'description': info}
-                    self.add_observable_data(observable_id, observable_data)
-                    return
+        self.process(query)
+        if self.answer is not None:
+           self.report(self.answer)
+        else:
+            self.error("Something went wrong")
+    
+    def summary(self,raw):
+        count = self.build_taxonomy(len(self.answer["Answer"]))
+        return { "taxonomies" : [count]}
 
-        self.info('No information found for IP address')
-        return
 
 
 if __name__ == '__main__':
-    ip_enrichment = IPEnrichment()
-    ip_enrichment.run()
-    sys.exit(0)
+    IPEnrichment().run()
