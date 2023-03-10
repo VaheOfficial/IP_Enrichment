@@ -4,7 +4,9 @@
 
 from cortexutils.analyzer import Analyzer
 from description import RECORDS
-import json
+import os
+import re
+import csv
 
 
 class IPEnrichment(Analyzer):
@@ -14,22 +16,67 @@ class IPEnrichment(Analyzer):
         self.answer = None
 
     def process(self, query):
+        
+        file_path = "/opt/cortex/analyzers-responders/analyzers/IPEnrichment/information.csv"
+        with open(file_path, mode='r') as file:
+            reader = csv.reader(file)
+            header = next(reader)
+            
+            for row in reader:
+                ip = row[0]
+                if ip == query['name']:
+                    description = row[header.index('Description')]
+                    self.answer = {
+                        "Answer":[ 
+                        {
+                            "name": query['name'],
+                            "data": description
+                        }
+                        ]
+                    }
 
-        record = RECORDS.get(query['name'])
-        if record is not None:
-            self.answer = {
-                "Answer":[ 
-                {
-                    "name": query['name'],
-                    "data": record
-                }
-                ]
-            }
-        else:
-            self.answer = {
-                "status": "error",
-                "message": f"No record found for {query['name']}"
-            }
+
+
+        # file_path = '/opt/cortex/analyzers-responders/analyzers/IPEnrichment/ipdescription.txt'
+        # if not os.path.isfile(file_path):
+        #     self.error('File not found')
+        #     return
+        # else:
+        #     ipinfo = query['name']
+        #     with open(file_path, 'r') as file:
+        #         for line in file:
+        #             if ipinfo in line:
+        #                 # Extract the information from the same line as the IP address
+        #                 info = line.strip().split('-')[1]
+        #                 self.answer = {
+        #                     "Answer":[ 
+        #                     {
+        #                         "name": query['name'],
+        #                         "data": info
+        #                     }
+        #                     ]
+        #                 }
+        #             else:
+        #                 self.answer = {
+        #                     "status": "error",
+        #                     "message": f"No record found for {query['name']}"
+        #                 }
+
+        # record = RECORDS.get(query['name'])
+        # if record is not None:
+        #     self.answer = {
+        #         "Answer":[ 
+        #         {
+        #             "name": query['name'],
+        #             "data": record
+        #         }
+        #         ]
+        #     }
+        # else:
+        #     self.answer = {
+        #         "status": "error",
+        #         "message": f"No record found for {query['name']}"
+        #     }
     
     def run(self):
         if self.data_type not in ["ip"]:
