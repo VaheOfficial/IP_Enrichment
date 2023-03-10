@@ -1,21 +1,21 @@
 {
     "name": "IPEnrichment",
-    "version": "1.0",
     "author": "65 CYS",
-    "url": "https://github.com/VaheOfficial/IP_Enrichment",
     "license": "CC",
+    "url": "https://github.com/VaheOfficial/IP_Enrichment",
+    "version": "1.0",
     "description": "Enriches IP address observables with information from a text file.",
     "dataTypeList": ["ip"],
     "baseConfig": "IPEnrichment",
+    "command": "IPEnrichment/ip_enrichment.py",
     "configurationItems": [
         {
-            "name": "text_file_path",
-            "description": "Path to the text file containing IP address information",
+            "name": "ip",
+            "description": "ip to enrich",
             "type": "ip",
             "required": true,
-            "multi": false,
-            "defaultValue": "0.0.0.0"
+            "multi": false
         }
     ],
-    "command": "IPEnrichment/ip_enrichment.py"
+    "dockerImage": "docker.io/library/ipenrichment:1.0"
 }
